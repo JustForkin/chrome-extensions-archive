@@ -14,6 +14,8 @@ import os
 import shutil
 import requests
 from extstats.store_infos_history import is_stored_recent, store_infos_history, latest_stored, is_404
+from extstats.CONSTS import SITEMAP_FILE
+
 
 ORDER_BY_POP = len(sys.argv) > 1 and sys.argv[1] == 'by_pop'
 SPECIFIC_EXT = sys.argv[1] if not ORDER_BY_POP and len(sys.argv) > 1 else None
@@ -23,7 +25,7 @@ TMP_FILE = 'crawled/tmp/tmp_crx_{ext_id}.zip'
 DEST_DIR = CRX_DIRECTORY + '{ext_id}/'
 DEST_FILE = '{dir}/{version}.zip'
 
-extlist = json.load(open('data/sitemap.json'))
+extlist = json.load(open(SITEMAP_FILE))
 
 shuffle(extlist)
 
@@ -88,13 +90,13 @@ def do(url):
         except Exception as e:
             ok(bad('fail to download crx:'), e)
             return
-        
+
         manifest = None
         try:
             manifest = extract_manifest_of_file(tmp_file)
         except Exception as e:
-            ok(bad('bad download, parse of manifest failed'), e) 
-    
+            ok(bad('bad download, parse of manifest failed'), e)
+
         if manifest and 'version' in manifest:
             version = manifest['version']
             print(good('manifest version:'), version)

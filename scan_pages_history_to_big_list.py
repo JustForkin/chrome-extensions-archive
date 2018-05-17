@@ -1,7 +1,7 @@
 import json, random, os
 from tqdm import tqdm
 
-from extstats.CONSTS import SITEMAP_FILE, PAGES_DIRECTORY
+from extstats.CONSTS import SITEMAP_FILE, PAGES_DIRECTORY, PAGES_FILE
 
 from extstats.store_infos_history import latest_good, TO_RM
 
@@ -11,7 +11,7 @@ random.shuffle(ext_ids)
 
 exts = []
 
-urls = {url.split('/')[-1]: url for url in json.load(open(SITEMAP_FILE))}
+urls_sitemap = {url.split('/')[-1]: url for url in json.load(open(SITEMAP_FILE))}
 
 for ext_id in tqdm(ext_ids):
     latest = latest_good(ext_id)
@@ -19,11 +19,11 @@ for ext_id in tqdm(ext_ids):
         content = latest['content']
         content['ext_id'] = ext_id
         if 'url' not in content:
-            if ext_id in urls:
-                content['url'] = urls[ext_id]
+            if ext_id in urls_sitemap:
+                content['url'] = urls_sitemap[ext_id]
             else:
                 content['url'] = "https://chrome.google.com/webstore/detail/_/" + ext_id
-        content['not_in_sitemap'] = ext_id not in urls
+        content['not_in_sitemap'] = ext_id not in urls_sitemap
         exts.append(content)
     if len(TO_RM) % 100 == 10:
         print(len(TO_RM))
@@ -38,7 +38,7 @@ def safeint(n):
 
 exts = sorted((x for x in exts), key=lambda x: -safeint(x.get('user_count')))
 
-json.dump(exts, open('data/PAGES.json', 'w'), indent=2, sort_keys=True)
+json.dump(exts, open(PAGES_FILE, 'w'), indent=2, sort_keys=True)
 
 for x in exts[:20]:
     print(x['name'], x['user_count'])
